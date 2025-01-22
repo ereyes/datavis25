@@ -7,12 +7,12 @@ Exercices de la séance 1 :
 1. https://ereyes.github.io/datavis25/s01e01.html  
 
 Exercices de la séance 3 :  
-1. https://ereyes.github.io/datavis25/  s03-vega.html  
-2. https://ereyes.github.io/datavis25/  s03-plotly.html  
-3. https://ereyes.github.io/datavis25/  s03-canvas-csv.html  
-4. https://ereyes.github.io/datavis25/  s03-canvas-physique.html  
-5. https://ereyes.github.io/datavis25/  s03-threejs.html  
-6. https://ereyes.github.io/datavis25/  s03-threejs_v2.html
+1. https://ereyes.github.io/datavis25/s03-vega.html  
+2. https://ereyes.github.io/datavis25/s03-plotly.html  
+3. https://ereyes.github.io/datavis25/s03-canvas-csv.html  
+4. https://ereyes.github.io/datavis25/s03-canvas-physique.html  
+5. https://ereyes.github.io/datavis25/s03-threejs.html  
+6. https://ereyes.github.io/datavis25/s03-threejs_v2.html
 
 
 ---
