@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Top 50 Visualization with Random Physics</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spotify Top 50 Visualization with Random Physics</h1>
+    <canvas id="visualization" width="800" height="800"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/box2dweb@2.1.0-b/box2d.min.js"></script>
+    <script>
+        // Function to load CSV file
+        function loadCSVFile() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'spotifytop50.csv', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var csvData = xhr.responseText;
+                    visualizeCSVData(csvData);
+                }
+            };
+            xhr.send();
+        }
+
+        // Function to visualize CSV data
+        function visualizeCSVData(csvData) {
+            const rows = csvData.split('\n').slice(1).filter(row => row.trim() !== '');
+            const data = rows.map(row => {
+                const [num, Track, Artist, Genre, BPM, Energy, Danceability, Loudness, Liveness, Valence, Length, Acousticness, Speechiness, Popularity] = row.split(',');
+                return { Track, Artist, Danceability: parseFloat(Danceability), Length: parseInt(Length) };
+            });
+            initializePhysics(data);
+        }
+
+        // Initialize Box2D world
+        function initializePhysics(data) {
+            const canvas = document.getElementById('visualization');
+            const ctx = canvas.getContext('2d');
+
+            const b2Vec2 = Box2D.Common.Math.b2Vec2;
+            const b2BodyDef = Box2D.Dynamics.b2BodyDef;
+            const b2Body = Box2D.Dynamics.b2Body;
+            const b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
+            const b2World = Box2D.Dynamics.b2World;
+            const b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
+            const b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+
+            const world = new b2World(new b2Vec2(0, 0), true);
+
+            // Create canvas boundaries
+            function createBoundary(x, y, width, height) {
+                const bodyDef = new b2BodyDef();
+                bodyDef.type = b2Body.b2_staticBody;
+                bodyDef.position.Set(x / 30, y / 30);
+
+                const fixtureDef = new b2FixtureDef();
+                fixtureDef.shape = new b2PolygonShape();
+                fixtureDef.shape.SetAsBox(width / 30, height / 30);
+
+                const body = world.CreateBody(bodyDef);
+                body.CreateFixture(fixtureDef);
+            }
+
+            // Add boundaries for the canvas
+            createBoundary(400, 0, 400, 10); // Top
+            createBoundary(400, 800, 400, 10); // Bottom
+            createBoundary(0, 400, 10, 400); // Left
+            createBoundary(800, 400, 10, 400); // Right
+
+            // Create circles with random initial velocities
+            data.forEach((row) => {
+                const radius = row.Length / 50; // Scale the length value
+
+                const bodyDef = new b2BodyDef();
+                bodyDef.type = b2Body.b2_dynamicBody;
+                bodyDef.position.Set((Math.random() * (800 - 2 * radius) + radius) / 30, (Math.random() * (800 - 2 * radius) + radius) / 30);
+                bodyDef.linearVelocity = new b2Vec2((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
+
+                const fixtureDef = new b2FixtureDef();
+                fixtureDef.shape = new b2CircleShape(radius / 30);
+                fixtureDef.density = 1.0;
+                fixtureDef.friction = 0.3;
+                fixtureDef.restitution = 0.8; // Bounciness
+
+                const body = world.CreateBody(bodyDef);
+                body.CreateFixture(fixtureDef);
+            });
+
+            // Update and draw the world
+            function update() {
+                world.Step(1 / 60, 10, 10);
+                world.ClearForces();
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let body = world.GetBodyList(); body; body = body.GetNext()) {
+                    const position = body.GetPosition();
+                    for (let fixture = body.GetFixtureList(); fixture; fixture = fixture.GetNext()) {
+                        const shape = fixture.GetShape();
+
+                        if (shape.GetType() === 0) { // Circle shape
+                            const radius = shape.GetRadius() * 30;
+                            ctx.beginPath();
+                            ctx.arc(position.x * 30, position.y * 30, radius, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(0, 150, 255, 0.6)`;
+                            ctx.fill();
+                            ctx.strokeStyle = '#003366';
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(update);
+            }
+
+            update();
+        }
+
+        // Main execution
+        loadCSVFile();
+    </script>
+</body>
+</html>

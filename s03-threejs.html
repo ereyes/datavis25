@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Histogram - Spotify Top 50</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="histogram-container" style="width: 100%; height: 100vh;"></div>
+    <script>
+        // CSV Data (simplified for example purposes)
+        const data = [
+            { label: "Señorita", value: 191 },
+            { label: "China", value: 302 },
+            { label: "boyfriend", value: 186 },
+            { label: "Beautiful People", value: 198 },
+            { label: "Goodbyes", value: 175 }
+            // Add more data rows as needed
+        ];
+
+        // Scene setup
+        const container = document.getElementById('histogram-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        container.appendChild(renderer.domElement);
+
+        // Add light
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+
+        const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+        scene.add(ambientLight);
+
+        // Create 3D histogram bars
+        const barWidth = 1;
+        const barSpacing = 1.5;
+        const barMaterial = new THREE.MeshStandardMaterial({ color: 0x00aaff });
+
+        data.forEach((item, index) => {
+            const barHeight = item.value / 10; // Scale height for better visualization
+            const geometry = new THREE.BoxGeometry(barWidth, barHeight, barWidth);
+            const bar = new THREE.Mesh(geometry, barMaterial);
+
+            // Position bars
+            bar.position.x = index * barSpacing;
+            bar.position.y = barHeight / 2; // Move up by half height
+            bar.position.z = 0;
+
+            scene.add(bar);
+
+            // Add labels
+            const loader = new THREE.FontLoader();
+            loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                const textGeometry = new THREE.TextGeometry(item.label, {
+                    font: font,
+                    size: 0.4,
+                    height: 0.1
+                });
+                const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+                textMesh.position.set(index * barSpacing, 0, 1.5); // Slightly in front of the bar
+                scene.add(textMesh);
+            });
+        });
+
+        // Camera position
+        camera.position.z = 10;
+        camera.position.y = 5;
+        camera.lookAt(0, 0, 0);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate the scene on the horizontal axis
+            scene.rotation.y += 0.01;
+            scene.rotation.x += 0.01;
+            scene.rotation.z += 0.01;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

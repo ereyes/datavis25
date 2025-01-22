@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Top 50 Visualization</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spotify Top 50 Visualization</h1>
+    <canvas id="visualization" width="800" height="800"></canvas>
+    <script>
+        // Function to load CSV file
+        function loadCSVFile() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'spotifytop50.csv', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var csvData = xhr.responseText;
+                    visualizeCSVData(csvData);
+                }
+            };
+            xhr.send();
+        }
+
+        // Function to visualize CSV data
+        function visualizeCSVData(csvData) {
+            const rows = csvData.split('\n').slice(1).filter(row => row.trim() !== '');
+            const data = rows.map(row => {
+                const [num, Track, Artist, Genre, BPM, Energy, Danceability, Loudness, Liveness, Valence, Length, Acousticness, Speechiness, Popularity] = row.split(',');
+                return { Track, Artist, Danceability: parseFloat(Danceability), Length: parseInt(Length) };
+            });
+            drawCircles(data, ctx);
+        }
+
+        // Function to draw the circles
+        function drawCircles(data, ctx) {
+            const canvasWidth = ctx.canvas.width;
+            const canvasHeight = ctx.canvas.height;
+
+            data.forEach((row, index) => {
+                const radius = row.Length / 50; // Scale the length value
+                const x = Math.random() * (canvasWidth - 2 * radius) + radius;
+                const y = Math.random() * (canvasHeight - 2 * radius) + radius;
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0, 150, 255, 0.6)`;
+                ctx.fill();
+                ctx.strokeStyle = '#003366';
+                ctx.stroke();
+            });
+        }
+
+        // Main execution
+        const canvas = document.getElementById('visualization');
+        const ctx = canvas.getContext('2d');
+
+        loadCSVFile();
+    </script>
+</body>
+</html>
