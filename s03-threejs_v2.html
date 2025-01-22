@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Histogram - Spotify Top 50</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/threejs-orbit-controls@1.0.3/dist/threejs-orbit-controls.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+
+</head>
+<body>
+    <div id="histogram-container" style="width: 100%; height: 100vh;"></div>
+    <script>
+        const data = [
+            { label: "Señorita", value: 191 },
+            { label: "China", value: 302 },
+            { label: "boyfriend", value: 186 },
+            { label: "Beautiful People", value: 198 },
+            { label: "Goodbyes", value: 175 }
+        ];
+
+        const container = document.getElementById('histogram-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xd3d3d3);
+
+        const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        container.appendChild(renderer.domElement);
+
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        // Use OrbitControls from Three.js examples
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        const barWidth = 0.8;
+        const barSpacing = 1.2;
+        const barMaterial = new THREE.MeshStandardMaterial({ color: 0x00aaff });
+
+        const maxBarHeight = Math.max(...data.map(item => item.value)) / 10;
+        const scaleFactor = 10 / maxBarHeight;
+
+        data.forEach((item, index) => {
+            const barHeight = (item.value / 10) * scaleFactor;
+            const geometry = new THREE.BoxGeometry(barWidth, barHeight, barWidth);
+            const bar = new THREE.Mesh(geometry, barMaterial);
+            bar.position.x = index * barSpacing;
+            bar.position.y = barHeight / 2;
+            bar.position.z = 0;
+            scene.add(bar);
+
+            const loader = new THREE.FontLoader();
+            loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                const textGeometry = new THREE.TextGeometry(item.label, {
+                    font: font,
+                    size: 0.2,
+                    height: 0.05
+                });
+                const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+                textMesh.position.set(index * barSpacing, 0, 0.8);
+                scene.add(textMesh);
+            });
+        });
+
+        camera.position.set(0, 5, 15);
+        camera.lookAt(0, 0, 0);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            scene.rotation.y += 0.01;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+        });
+    </script>
+</body>
+</html>
