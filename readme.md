@@ -14,6 +14,10 @@ Exercices de la séance 3 :
 5. https://ereyes.github.io/datavis25/s03-threejs.html  
 6. https://ereyes.github.io/datavis25/s03-threejs_v2.html
 
+Codes de la séance 4 :
+https://ereyes.github.io/datavis25/s04_ar_histo.html  
+
+
 
 ---
 
